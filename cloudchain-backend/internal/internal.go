@@ -1,5 +1,10 @@
 package internal
 
-type internal interface {
+type internal struct {
+	
+
+}
+
+func(i *internal) set() {
 
 }
