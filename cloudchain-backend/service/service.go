@@ -8,4 +8,7 @@ func(s *Service) GetService() {
 
 }
 
+func(s *Service) SetService() {
+
+}
 
