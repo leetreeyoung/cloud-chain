@@ -1,7 +1,7 @@
 package internal
 
 type internal struct {
-	
+
 
 }
 
