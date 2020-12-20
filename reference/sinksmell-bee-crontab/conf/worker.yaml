@@ -1,0 +1,11 @@
+# etcd config
+etcd_endpoints:
+  - "192.168.11.22:2379"
+
+etcd_dail_timeout: 5000
+
+# mongo config
+mongo_url: "mongodb://192.168.11.22:27017"
+
+# prometheus config
+prom_port: 2333

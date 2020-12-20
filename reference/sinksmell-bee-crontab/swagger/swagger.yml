@@ -1,0 +1,116 @@
+swagger: "2.0"
+info:
+  title: beego Test API
+  description: beego has a very cool tools to autogenerate documents for your API
+  version: 1.0.0
+  termsOfService: http://beego.me/
+  contact:
+    email: astaxie@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+basePath: /v1
+paths:
+  /job/delete:
+    post:
+      tags:
+      - job
+      description: delete job
+      operationId: JobController.DeleteJob
+      parameters:
+      - in: body
+        name: body
+        description: body for Job content
+        required: true
+        schema:
+          $ref: '#/definitions/models.Job'
+      responses:
+        "200":
+          description: '{int}'
+        "403":
+          description: body is empty
+  /job/kill:
+    post:
+      tags:
+      - job
+      description: Kill job by  name of job
+      operationId: JobController.KillJob
+      parameters:
+      - in: body
+        name: body
+        description: body for Job content
+        required: true
+        schema:
+          $ref: '#/definitions/models.Job'
+      responses:
+        "200":
+          description: '{int}'
+        "403":
+          description: body is empty
+  /job/list:
+    get:
+      tags:
+      - job
+      description: get all of the jobs
+      operationId: JobController.ListJob
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Job'
+  /job/log/{name}:
+    get:
+      tags:
+      - job
+      description: get job execute log by job name
+      operationId: JobController.GetJobLog
+      parameters:
+      - in: path
+        name: name
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+  /job/save:
+    post:
+      tags:
+      - job
+      description: create jobs or update jobs
+      operationId: JobController.SaveJob
+      parameters:
+      - in: body
+        name: body
+        description: body for Job content
+        required: true
+        schema:
+          $ref: '#/definitions/models.Job'
+      responses:
+        "200":
+          description: '{int}'
+        "403":
+          description: body is empty
+  /worker/list:
+    get:
+      tags:
+      - worker
+      description: get all of the workers ip
+      operationId: WorkerController.List Workers Node
+      responses:
+        "200":
+          description: ""
+definitions:
+  models.Job:
+    title: Job
+    type: object
+    properties:
+      command:
+        type: string
+      cronExpr:
+        type: string
+      name:
+        type: string
+      timeOut:
+        type: integer
+        format: int64

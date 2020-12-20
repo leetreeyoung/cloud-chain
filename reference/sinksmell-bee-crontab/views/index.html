@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bee-crontab</title>
+    <script src="/static/js/vue.js"></script>
+    <script src="/static/js/axios.min.js"></script>
+
+    <!-- 字体和图标 -->
+    <link rel="stylesheet" href="/static/css/font.css">
+    <link rel="stylesheet" href="/static/css/material-icons.css">
+
+    <!-- Element UI -->
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="/static/css/index.css">
+    <!-- 引入组件库 -->
+    <script src="/static/js/index.js"></script>
+
+    <!-- MD CSS -->
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="/static/css/materialize.min.css">
+
+
+</head>
+<body>
+<nav>
+    <div class="nav-wrapper" style="padding-left: 20px">
+        <a href="#" class="brand-logo">Bee-CronTab</a>
+    </div>
+</nav>
+
+
+<div id="app" style="padding-top: 30px">
+
+    <div class="container">
+        <div style="padding-top: 10px;padding-bottom: 10px">
+            <a class="waves-effect waves-light btn" @click="dialogVisible = true">新建</a>
+            <a class="waves-effect waves-light green lighten-2 btn" @click="reLoadJobs">刷新</a>
+            <a class="waves-effect waves-light red lighten-1 btn" @click="getWorkers">监控</a>
+        </div>
+        <template>
+            <el-row type="flex" justify="center">
+                <el-table
+                        :data="tableData"
+                        border
+                        style="width: 100%">
+                    <el-table-column
+                            prop="id"
+                            label="任务ID"
+                            width="180">
+                    </el-table-column>
+                    <el-table-column
+                            prop="name"
+                            label="任务名"
+                            width="100">
+                    </el-table-column>
+                    <el-table-column
+                            prop="command"
+                            label="任务命令"
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="cron_expr"
+                            label="cron表达式"
+                            width="120">
+                    </el-table-column>
+                    <el-table-column
+                            prop="time_out"
+                            label="超时时间"
+                            width="100">
+                    </el-table-column>
+                    <el-table-column
+                            label="操作">
+                        <template slot-scope="scope">
+
+                            <el-button class="waves-effect waves-light light-blue darken-2 btn-small"
+                                       @click="handleEdit(scope.$index,scope.row)"
+                                       type="primary"
+                                       size="small">编辑
+                            </el-button>
+                            <el-button class="waves-effect waves-light red darken-2 btn-small"
+                                       @click="handleRemove(scope.$index,scope.row)"
+                                       type="danger"
+                                       size="small">删除
+                            </el-button>
+                            <el-button class="waves-effect waves-light yellow darken-2 btn-small"
+                                       @click="killJob(scope.row)"
+                                       type="warning"
+                                       size="small">中止
+                            </el-button>
+
+                            <el-button class="waves-effect waves-light green lighten-2 btn-small"
+                                       @click="getLog(scope.row)"
+                                       type="success"
+                                       size="small">日志
+                            </el-button>
+
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </el-row>
+        </template>
+    </div>
+
+    <el-dialog title="添加/修改任务" :visible.sync="dialogVisible">
+
+        <div class="row">
+            <form class="col s12">
+                <div class="row">
+                    <div class="input-field col s8">
+                        <input id="job_name" type="text" name="name" v-model="jobForm.name" class="validate">
+                        <label for="job_name">任务名称</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s8">
+                        <input id="job_cmd" type="text" name="command" v-model="jobForm.command" class="validate">
+                        <label for="job_cmd">执行命令</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s8">
+                        <input id="job_cron" type="text" name="cron_expr" v-model="jobForm.cron_expr" class="validate">
+                        <label for="job_cron">cron表达式</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s8">
+                        <input id="job_to" type="number" name="time_out" v-model="jobForm.time_out" class="validate">
+                        <label for="job_to">超时时间</label>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <div slot="footer" class="dialog-footer">
+            <el-button
+                    class="waves-effect waves-light red lighten-2 btn-small"
+                    @click="dialogVisible = false">取 消
+            </el-button>
+            <el-button type="primary"
+                       class="waves-effect waves-light light-blue darken-2 btn-small"
+                       @click="createJob">确 定
+            </el-button>
+        </div>
+    </el-dialog>
+
+    <el-dialog title="任务日志" :visible.sync="logVisible">
+
+        <el-table :data="logData">
+            <el-table-column property="job_name" label="任务名称" width="150"></el-table-column>
+            <el-table-column property="command" label="执行命令" width="200"></el-table-column>
+            <el-table-column property="output" label="输出结果" width="200"></el-table-column>
+            <el-table-column property="err" label="错误信息"></el-table-column>
+            <el-table-column property="plan_time" label="计划调度时间" width="200"></el-table-column>
+            <el-table-column property="schedule_time" label="实际调度时间" width="200"></el-table-column>
+            <el-table-column property="start_time" label="开始执行时间" width="200"></el-table-column>
+            <el-table-column property="end_time" label="结束执行时间" width="200"></el-table-column>
+        </el-table>
+
+    </el-dialog>
+
+    <el-dialog title="节点信息" :visible.sync="nodeVisible">
+
+        <el-table :data="nodeData">
+            <el-table-column property="time" label="检测时间" width="200"></el-table-column>
+            <el-table-column property="ip" label="节点ip" width="200"></el-table-column>
+        </el-table>
+    </el-dialog>
+
+</div>
+
+<script type="text/javascript" src="/static/js/jquery-2.1.1.min.js"></script>
+<!-- Compiled and minified JavaScript -->
+<script src="/static/js/materialize.min.js"></script>
+
+<script>
+
+
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                tableData: [],
+                formLabelWidth: '120px',
+                dialogVisible: false,
+                logVisible: false,
+                nodeVisible: false,
+                jobForm: {
+                    id: '',
+                    name: '',
+                    command: '',
+                    cron_expr: '',
+                    time_out: 0
+                },
+                logData: [],
+                nodeData: [],
+            };
+        },
+        methods: {
+            handleSortChange({name, order}) {
+                this.list = this.list.sort((a, b) => order === 'asc' ? a[name] - b[name] : b[name] - a[name]);
+            },
+            handleEdit(index, row) {
+                // console.log(row)
+                // console.log(row.name)
+                // console.log(index)
+                this.jobForm.id = row.id
+                this.jobForm.name = row.name
+                this.jobForm.command = row.command
+                this.jobForm.cron_expr = row.cron_expr
+                this.jobForm.time_out = row.time_out
+                this.dialogVisible = true
+
+                this.showForum()
+            },
+            handleRemove(index, row) {
+                axios.post('/v1/job/delete', {
+                    id: row.id,
+                    name: row.name
+                }).then(res => {
+                    if (res.data.code == 0) {
+                        this.tableData.splice(index, 1)
+                        this.$message({
+                            showClose: true,
+                            message: '删除成功!',
+                            type: 'success'
+                        });
+                        //   console.log(res.data)
+                    } else {
+                        this.$message({
+                            showClose: true,
+                            message: '删除失败!',
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+            killJob(row) {
+                //  console.log(row.name)
+                axios.post('/v1/job/kill', {
+                    id: row.id
+                }).then(res => {
+                    if (res.data.code == 0) {
+                        this.$message({
+                            showClose: true,
+                            message: '成功杀死任务!',
+                            type: 'success'
+                        });
+                    } else {
+                        this.$message({
+                            showClose: true,
+                            message: '操作失败!',
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+            getLog(row) {
+                this.logVisible = true
+                console.log("row id is",row.id)
+                axios.get("/v1/job/log/" + row.id).then(res => {
+                    this.logData = res.data.data
+                })
+            },
+            getWorkers() {
+                this.nodeVisible = true
+                axios.get("/v1/worker/list").then(res => {
+                    this.nodeData = res.data.data
+                })
+            },
+            handleClose(done) {
+                this.$confirm('确认关闭？')
+                    .then(_ => {
+                        done();
+                    })
+                    .catch(_ => {
+                    });
+            },
+            reLoadJobs() {
+                axios.get('/v1/job/list').then(res => {
+                    //  console.log(res.data)
+                    this.tableData = res.data.data
+                })
+                this.clearForm()
+            },
+            createJob() {
+                this.showForum()
+                axios.post('/v1/job/save', this.jobForm).then(res => {
+                    //   console.log(res.data)
+                    this.clearForm()
+                    this.dialogVisible = false
+                    if (res.data.code == 0) {
+                        this.$message({
+                            showClose: true,
+                            message: '添加成功!',
+                            type: 'success'
+                        });
+                        this.reLoadJobs();
+                    } else {
+                        this.$message({
+                            showClose: true,
+                            message: '添加失败!',
+                            type: 'error'
+                        });
+                    }
+                })
+            },
+
+            clearForm() {
+                this.jobForm.id = ''
+                this.jobForm.name = ''
+                this.jobForm.command = ''
+                this.jobForm.cron_expr = ''
+                this.jobForm.time_out = 0
+            },
+            showForum() {
+                console.log("id", this.jobForm.id)
+                console.log("name", this.jobForm.name)
+                console.log("command", this.jobForm.command)
+                console.log("cron_expr", this.jobForm.cron_expr)
+                console.log("time_out", this.jobForm.time_out)
+            }
+        },
+        mounted() {
+            axios.get('/v1/job/list').then(res => {
+                console.log(res.data)
+                this.tableData = res.data.data
+            })
+        }
+    })
+
+
+</script>
+</body>
+</html>
