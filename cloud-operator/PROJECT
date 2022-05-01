@@ -1,0 +1,6 @@
+domain: cloud-operator
+layout:
+- go.kubebuilder.io/v3
+projectName: cloud-operator
+repo: cloud.io/cloud-operator
+version: "3"
