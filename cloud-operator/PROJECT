@@ -3,4 +3,14 @@ layout:
 - go.kubebuilder.io/v3
 projectName: cloud-operator
 repo: cloud.io/cloud-operator
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: cloud-operator
+  group: cloud.io
+  kind: Chain
+  path: cloud.io/cloud-operator/api/v1
+  version: v1
 version: "3"

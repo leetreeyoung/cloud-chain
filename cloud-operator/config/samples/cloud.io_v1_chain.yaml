@@ -1,0 +1,6 @@
+apiVersion: cloud.io.cloud-operator/v1
+kind: Chain
+metadata:
+  name: chain-sample
+spec:
+  # TODO(user): Add fields here
