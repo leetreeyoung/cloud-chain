@@ -41,6 +41,11 @@ type CloudChain struct {
 	Status CloudChainStatus `json:"status,omitempty"`
 }
 
+func (in *CloudChain) DeepCopyObject() runtime.Object {
+	//TODO implement me
+	panic("implement me")
+}
+
 // CloudChainList
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type CloudChainList struct {
