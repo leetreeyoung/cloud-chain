@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chain-deployment
+  namespace: cloud-chain
+  labels:
+    app: chain-deployment
+spec:
+  replicas: 3
+  template:
+    metadata:
+      name: chain-deployment
+      labels:
+        app: chain-deployment
+    spec:
+      containers:
+        - name: chain-deployment
+          image: origin0119/cloud-chain:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: chain-deployment
